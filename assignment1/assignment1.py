@@ -1,5 +1,4 @@
-from Game import Game
-from Shore import Shore
+from readFile import readFiles
+import sys
 
-g1 = Game(3, 3)
-g1.print_state()
+readFiles(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
