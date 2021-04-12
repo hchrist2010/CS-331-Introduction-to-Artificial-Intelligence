@@ -23,13 +23,6 @@ def is_valid(node: tuple, frontier: [tuple], explored: [tuple]) -> bool:
         return True
 
 
-def is_goal(node: tuple, final_state: tuple) -> bool:
-    if node == final_state:
-        return True
-    else:
-        return False
-
-
 def successor(node: tuple, frontier: [tuple], explored: [tuple]) -> [tuple]:
     successors = []
     for i in range(5):
@@ -85,6 +78,8 @@ def bfs(start: tuple, goal: tuple) -> ([tuple], int):
             frontier.append(node)
             prev[node] = current
 
+    return None, None
+
 
 def dfs(start: tuple, goal: tuple) -> ([tuple], int):
     prev = {}
@@ -105,9 +100,42 @@ def dfs(start: tuple, goal: tuple) -> ([tuple], int):
             frontier.append(node)
             prev[node] = current
 
+    return None, None
 
-def iddfs(start, goal) -> ([tuple], int):
-    raise NotImplementedError
+
+def iddfs(start: tuple, goal: tuple) -> ([tuple], int):
+    solution = None
+    max_depth = 0
+    while solution is None:
+        n = 0
+        prev = {}   # map node to prev node
+        depth = {}  # map node to depth
+        frontier = successor(start, (), ())
+        explored = []
+
+        depth[start] = 0
+        for node in frontier:
+            prev[node] = start
+            depth[node] = 1
+
+        while len(frontier):
+            current = frontier.pop()
+            if depth[current] > max_depth:
+                continue
+            if current == goal:
+                return traceback(start, goal, prev), n
+            explored.append(current)
+            n += 1
+
+            if depth[current] < max_depth:
+                for node in successor(current, frontier, explored):
+                    frontier.append(node)
+                    prev[node] = current
+                    depth[node] = depth[current] + 1
+
+        max_depth += 1
+
+    return None, None
 
 
 def astar(start, goal) -> ([tuple], int):
