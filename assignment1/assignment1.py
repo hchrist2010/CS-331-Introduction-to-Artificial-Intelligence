@@ -12,6 +12,7 @@ expansions = {
 }
 
 cutoff = (-1, -1, -1, -1, -1, -1)
+max_depth = 1000
 
 
 def is_valid(node: tuple, frontier: [tuple], explored: [tuple]) -> bool:
@@ -103,18 +104,19 @@ def dls(start: tuple, goal: tuple, limit: int) -> ([tuple], int):
 
 
 def dfs(start: tuple, goal: tuple) -> ([tuple], int):
-    solution, n = dls(start, goal, 1000)
-    if solution == None or solution == cutoff:
-        return None, None
-    else:
-        return dls(start, goal, 1000)
+    return dls(start, goal, max_depth)
+
+    # if solution == None or solution == cutoff:
+    #     return None, None
+    # else:
+    #     return dls(start, goal, 1000)
 
 
 def iddfs(start: tuple, goal: tuple) -> ([tuple], int):
     if start == goal:
         return [start], 0
     limit = 0
-    while True:
+    while limit in range(max_depth):
         solution, n = dls(start, goal, limit)
         if solution == cutoff:
             limit += 1
@@ -123,6 +125,7 @@ def iddfs(start: tuple, goal: tuple) -> ([tuple], int):
             return None, None
         else:
             return solution, n
+    return cutoff, None
 
 
 def astar(start, goal) -> ([tuple], int):
@@ -142,6 +145,8 @@ def parse(filename: str) -> tuple:
 def print_to_screen(solution: [tuple], n: int):
     if solution is None:
         print("No solution found")
+    elif solution == cutoff:
+        print("search reached cutoff")
     else:
         print("# of explored nodes = " + str(n))
         for i in range(len(solution)):
