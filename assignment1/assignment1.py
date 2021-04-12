@@ -11,6 +11,8 @@ expansions = {
     4: (0, 2)
 }
 
+cutoff = (-1, -1, -1, -1, -1, -1)
+
 
 def is_valid(node: tuple, frontier: [tuple], explored: [tuple]) -> bool:
     if node[0] < 0 or node[1] < 0 or node[3] < 0 or node[4] < 0:
@@ -23,7 +25,7 @@ def is_valid(node: tuple, frontier: [tuple], explored: [tuple]) -> bool:
         return True
 
 
-def successor(node: tuple, frontier: [tuple], explored: [tuple]) -> [tuple]:
+def expand(node: tuple, explored: [tuple], frontier: [tuple]) -> [tuple]:
     successors = []
     for i in range(5):
         node_cpy = list(copy(node))
@@ -60,84 +62,67 @@ def traceback(start: tuple, stop: tuple, prev: dict) -> [tuple]:
 
 
 def bfs(start: tuple, goal: tuple) -> ([tuple], int):
-    prev = {}
-    frontier = successor(start, (), ())
+    if start == goal:
+        return [start], 0
     explored = []
-    n = 0
-
-    for node in frontier:
-        prev[node] = start
-
+    frontier = [start]
+    prev = {}
     while len(frontier):
-        current = frontier.pop(0)
-        if current == goal:
-            return traceback(start, current, prev), n
-        explored.append(current)
-        n += 1
-        for node in successor(current, frontier, explored):
-            frontier.append(node)
-            prev[node] = current
-
+        node = frontier.pop(0)
+        explored.append(node)
+        for successor in expand(node, explored, frontier):
+            prev[successor] = node
+            if successor == goal:
+                return traceback(start, successor, prev), len(explored)
+            frontier.append(successor)
     return None, None
+
+
+def dls(start: tuple, goal: tuple, limit: int) -> ([tuple], int):
+    cutoff_reached = False
+    explored = []
+    frontier = [start]
+    prev = {}
+    depth = {start: 0}
+    while len(frontier):
+        node = frontier.pop()
+        if depth[node] >= limit:
+            cutoff_reached = True
+            continue
+        explored.append(node)
+        for successor in expand(node, explored, frontier):
+            prev[successor] = node
+            depth[successor] = depth[node] + 1
+            if successor == goal:
+                return traceback(start, successor, prev), len(explored)
+            frontier.append(successor)
+    if cutoff_reached:
+        return cutoff, None
+    else:
+        return None, None
 
 
 def dfs(start: tuple, goal: tuple) -> ([tuple], int):
-    prev = {}
-    frontier = successor(start, (), ())
-    explored = []
-    n = 0
-
-    for node in frontier:
-        prev[node] = start
-
-    while len(frontier):
-        current = frontier.pop()
-        if current == goal:
-            return traceback(start, current, prev), n
-        explored.append(current)
-        n += 1
-        for node in successor(current, frontier, explored):
-            frontier.append(node)
-            prev[node] = current
-
-    return None, None
+    solution, n = dls(start, goal, 1000)
+    if solution == None or solution == cutoff:
+        return None, None
+    else:
+        return dls(start, goal, 1000)
 
 
 def iddfs(start: tuple, goal: tuple) -> ([tuple], int):
-    solution = None
-    max_depth = 0
-    while solution is None:
-        n = 0
-        prev = {}   # map node to prev node
-        depth = {}  # map node to depth
-        frontier = successor(start, (), ())
-        explored = []
-
-        depth[start] = 0
-        for node in frontier:
-            prev[node] = start
-            depth[node] = 1
-
-        while len(frontier):
-            current = frontier.pop()
-            if depth[current] > max_depth:
-                continue
-            if current == goal:
-                return traceback(start, goal, prev), n
-            explored.append(current)
-            n += 1
-
-            if depth[current] == max_depth:
-                continue
-
-            for node in successor(current, frontier, explored):
-                frontier.append(node)
-                prev[node] = current
-                depth[node] = depth[current] + 1
-
-        max_depth += 1
-
-    return None, None
+    if start == goal:
+        return [start], 0
+    limit = 0
+    while True:
+        solution, n = dls(start, goal, limit)
+        if solution == cutoff:
+            limit += 1
+            continue
+        elif solution == None:
+            return None, None
+        else:
+            return solution, n
 
 
 def astar(start, goal) -> ([tuple], int):
@@ -155,22 +140,29 @@ def parse(filename: str) -> tuple:
 
 
 def print_to_screen(solution: [tuple], n: int):
-    print("# of explored nodes = " + str(n))
-    for i in range(len(solution)):
-        print(str(i) + ": " + str(solution[i]))
+    if solution is None:
+        print("No solution found")
+    else:
+        print("# of explored nodes = " + str(n))
+        for i in range(len(solution)):
+            print(str(i) + ": " + str(solution[i]))
 
 
 def print_to_file(solution: [tuple], n: int, outfile: str):
     with open(outfile, 'w') as out:
-        print("# of explored nodes = " + str(n), file=out)
-        for i in range(len(solution)):
-            print(str(i) + ": " + str(solution[i]), file=out)
+        if solution is None:
+            print("No solution found", file=out)
+        else:
+            print("# of explored nodes = " + str(n), file=out)
+            for i in range(len(solution)):
+                print(str(i) + ": " + str(solution[i]), file=out)
 
 
 if __name__ == '__main__':
     if len(sys.argv) < 5:
         print("incorrect number of arguments: " + str(len(sys.argv)))
         exit(1)
+
     start = parse(sys.argv[1])
     goal = parse(sys.argv[2])
 
