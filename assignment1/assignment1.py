@@ -3,6 +3,13 @@ import sys
 import csv
 
 
+# this is the order in which expansions are handled
+# with
+#   n: (a, b)
+# where
+# n: the specific ordering of a given expansion
+# a: the number of chickens to add/subtract from a given side
+# b: the number of wolves to add/subtract from a given side
 expansions = {
     0: (1, 0),
     1: (2, 0),
@@ -11,14 +18,19 @@ expansions = {
     4: (0, 2)
 }
 
+# special case of a state tuple
+# returned by depth-limited search to indicate failure specifically because the depth limit was reached
+# *NOT* because there is no solution
 cutoff = (-1, -1, -1, -1, -1, -1)
+
+# Maximum number of iterations for DFS and IDDFS algorithms
 max_depth = 1000
 
 
 def is_valid(node: tuple, frontier: [tuple], explored: [tuple]) -> bool:
-    if node[0] < 0 or node[1] < 0 or node[3] < 0 or node[4] < 0:
+    if node[0] < 0 or node[1] < 0 or node[3] < 0 or node[4] < 0:  # invalid total quantity of chickens or wolves
         return False
-    elif (node[1] > node[0] != 0) or (node[4] > node[3] != 0):
+    elif (node[1] > node[0] != 0) or (node[4] > node[3] != 0):    # more wolves than chickens on a side
         return False
     elif (node in frontier) or (node in explored):
         return False
@@ -30,7 +42,7 @@ def expand(node: tuple, explored: [tuple], frontier: [tuple]) -> [tuple]:
     successors = []
     for i in range(5):
         node_cpy = list(copy(node))
-        if node_cpy[2] == 1:  # boat is on left bank
+        if node_cpy[2] == 1:                    # boat is on left bank
             node_cpy[0] -= expansions[i][0]
             node_cpy[3] += expansions[i][0]
             node_cpy[1] -= expansions[i][1]
@@ -38,7 +50,7 @@ def expand(node: tuple, explored: [tuple], frontier: [tuple]) -> [tuple]:
             node_cpy[2] = 0
             node_cpy[5] = 1
             node_cpy = tuple(node_cpy)
-        else:  # boat is on right bank
+        else:                                   # boat is on right bank
             node_cpy[0] += expansions[i][0]
             node_cpy[3] -= expansions[i][0]
             node_cpy[1] += expansions[i][1]
