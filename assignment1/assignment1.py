@@ -106,11 +106,6 @@ def dls(start: tuple, goal: tuple, limit: int) -> ([tuple], int):
 def dfs(start: tuple, goal: tuple) -> ([tuple], int):
     return dls(start, goal, max_depth)
 
-    # if solution == None or solution == cutoff:
-    #     return None, None
-    # else:
-    #     return dls(start, goal, 1000)
-
 
 def iddfs(start: tuple, goal: tuple) -> ([tuple], int):
     if start == goal:
