@@ -141,7 +141,7 @@ def print_to_screen(solution: [tuple], n: int):
     if solution is None:
         print("No solution found")
     elif solution == cutoff:
-        print("search reached cutoff")
+        print("Search reached cutoff")
     else:
         print("# of explored nodes = " + str(n))
         for i in range(len(solution)):
@@ -152,6 +152,8 @@ def print_to_file(solution: [tuple], n: int, outfile: str):
     with open(outfile, 'w') as out:
         if solution is None:
             print("No solution found", file=out)
+        elif solution == cutoff:
+            print("Search reached cutoff", file=out)
         else:
             print("# of explored nodes = " + str(n), file=out)
             for i in range(len(solution)):
