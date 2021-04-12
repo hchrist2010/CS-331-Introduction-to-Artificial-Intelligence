@@ -127,11 +127,13 @@ def iddfs(start: tuple, goal: tuple) -> ([tuple], int):
             explored.append(current)
             n += 1
 
-            if depth[current] < max_depth:
-                for node in successor(current, frontier, explored):
-                    frontier.append(node)
-                    prev[node] = current
-                    depth[node] = depth[current] + 1
+            if depth[current] == max_depth:
+                continue
+
+            for node in successor(current, frontier, explored):
+                frontier.append(node)
+                prev[node] = current
+                depth[node] = depth[current] + 1
 
         max_depth += 1
 
