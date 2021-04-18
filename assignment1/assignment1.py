@@ -1,6 +1,7 @@
 from copy import copy
 import sys
 import csv
+import heapq
 
 
 # this is the order in which expansions are handled
@@ -135,8 +136,48 @@ def iddfs(start: tuple, goal: tuple) -> ([tuple], int):
     return cutoff, None
 
 
-def astar(start, goal) -> ([tuple], int):
-    raise NotImplementedError
+def heuristic(node: tuple, goal: tuple) -> int:
+    return abs(goal[0] - node[0]) + abs(goal[1] - node[1]) + abs(goal[3] - node[3]) + abs(goal[4] - node[4])
+
+
+def astar(start: tuple, goal: tuple) -> ([tuple], int):
+    if start == goal:
+        return [start], 0
+    explored = []
+    frontier = [(heuristic(start, goal), start)]
+    prev = {}
+    while len(frontier):
+        node = heapq.heappop(frontier)[1]
+        explored.append(node)
+        if len(frontier) != 0:
+            frontierCpy = list(map(list, zip(*frontier)))[1]
+        else:
+            frontierCpy = []
+        for successor in expand(node, explored, frontierCpy):
+            prev[successor] = node
+            if successor == goal:
+                return traceback(start, successor, prev), len(explored)
+            heapq.heappush(frontier, (heuristic(successor, goal), successor))
+    return None, None
+
+
+def astar_(start: tuple, goal: tuple) -> ([tuple], int):
+    if start == goal:
+        return [start], 0
+    explored = []
+    frontier = [heuristic(start, goal)]
+    weight = {heuristic(start, goal): start}
+    prev = {}
+    while len(frontier):
+        node = weight[heapq.heappop(frontier)]
+        explored.append(node)
+        for successor in expand(node, explored, frontier):
+            prev[successor] = node
+            if successor == goal:
+                return traceback(start, successor, prev), len(explored)
+            heapq.heappush(frontier, heuristic(successor, goal))
+            weight[heuristic(successor, goal)] = successor
+    return None, None
 
 
 def parse(filename: str) -> tuple:
