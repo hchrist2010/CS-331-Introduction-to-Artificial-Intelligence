@@ -1,7 +1,11 @@
 from copy import copy
 import sys
 import csv
+<<<<<<< HEAD
 import math
+=======
+import heapq
+>>>>>>> 847eb6244d4af62649ac8d3503799582f375c6dd
 
 
 # this is the order in which expansions are handled
@@ -115,12 +119,19 @@ def dls(start: tuple, goal: tuple, limit: int) -> ([tuple], int):
     else:
         return None, None
 
+<<<<<<< HEAD
 def dfs(start: tuple, goal: tuple) -> ([tuple], int):
     return dls(start, goal, max_depth)
 
 def hValue(start, goal) -> float:
     # return (math.sqrt(((start[0]-goal[0]) ** 2) + ((start[1]-goal[1]) ** 2)))
     return abs(start[0] - goal[0]) + abs(start[1] - goal[1]) + abs(start[3] - goal[3]) + abs(start[4] - goal[4])
+=======
+
+def dfs(start: tuple, goal: tuple) -> ([tuple], int):
+    return dls(start, goal, max_depth)
+
+>>>>>>> 847eb6244d4af62649ac8d3503799582f375c6dd
 
 def iddfs(start: tuple, goal: tuple) -> ([tuple], int):
     if start == goal:
@@ -137,6 +148,7 @@ def iddfs(start: tuple, goal: tuple) -> ([tuple], int):
             return solution, n
     return cutoff, None
 
+<<<<<<< HEAD
 class Node:
     def __init__(self, position:(), parent:()):
         self.position = position
@@ -229,6 +241,52 @@ def add_to_open(open, neighbor):
         if(neighbor == node and neighbor.f >= node.f):
             return False
     return True
+=======
+
+def heuristic(node: tuple, goal: tuple) -> int:
+    return abs(goal[0] - node[0]) + abs(goal[1] - node[1]) + abs(goal[3] - node[3]) + abs(goal[4] - node[4])
+
+
+def astar(start: tuple, goal: tuple) -> ([tuple], int):
+    if start == goal:
+        return [start], 0
+    explored = []
+    frontier = [(heuristic(start, goal), start)]
+    prev = {}
+    while len(frontier):
+        node = heapq.heappop(frontier)[1]
+        explored.append(node)
+        if len(frontier) != 0:
+            frontierCpy = list(map(list, zip(*frontier)))[1]
+        else:
+            frontierCpy = []
+        for successor in expand(node, explored, frontierCpy):
+            prev[successor] = node
+            if successor == goal:
+                return traceback(start, successor, prev), len(explored)
+            heapq.heappush(frontier, (heuristic(successor, goal), successor))
+    return None, None
+
+
+def astar_(start: tuple, goal: tuple) -> ([tuple], int):
+    if start == goal:
+        return [start], 0
+    explored = []
+    frontier = [heuristic(start, goal)]
+    weight = {heuristic(start, goal): start}
+    prev = {}
+    while len(frontier):
+        node = weight[heapq.heappop(frontier)]
+        explored.append(node)
+        for successor in expand(node, explored, frontier):
+            prev[successor] = node
+            if successor == goal:
+                return traceback(start, successor, prev), len(explored)
+            heapq.heappush(frontier, heuristic(successor, goal))
+            weight[heuristic(successor, goal)] = successor
+    return None, None
+
+>>>>>>> 847eb6244d4af62649ac8d3503799582f375c6dd
 
 def parse(filename: str) -> tuple:
     with open(filename, 'r') as fd:
