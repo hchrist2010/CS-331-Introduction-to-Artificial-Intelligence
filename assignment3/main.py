@@ -1,6 +1,6 @@
 import re
 import os
-import bisect
+import numpy as numpy
 
 testFile = open("testSet.txt", "rt")
 trainingFile = open("trainingSet.txt", "rt")
@@ -31,13 +31,6 @@ def getVocab(lines):
     return sorted(vocab)
 
 
-# class feature:
-#     def __init__(self, size):
-#         self.size = size
-#         self.feats = [0] * (size + 1)
-#
-#     def setFeatures(selfself, sentence):
-
 def createFeature(vocab, lines):
     M = len(vocab)
 
@@ -61,27 +54,26 @@ def createFeature(vocab, lines):
 
     return features
 
+
 def outputPreProcessed(vocab, filePath, features):
     if os.path.exists(filePath):
         os.remove(filePath)
 
     out = open(filePath, "w")
 
-    for word in vocab:
-        out.write('%s,'% word)
-    out.write('classlabel')
-    out.write('\n')
+    for word in range(len(vocab) - 1):
+        out.write(str(vocab[word]) + ',')
+    out.write(str(vocab[word]) + ',classpath\n')
 
     for feature in features:
-        for feat in feature:
-            out.write('%d,' % feat)
-        out.write('\n')
+        for word in range(len(feature) - 1):
+            out.write(str(feature[word]) + ',')
+        out.write(str(feature[word]) + '\n')
+    out.close()
 
 
-    # if os.path.exists("preprocessed_train.txt"):
-    #     os.remove("preprocessed_train.txt")
-    # if os.path.exists("preprocessed_test.txt"):
-    #     os.remove("preprocessed_test.txt")
+def trainClassifiers():
+    train = numpy.genfromtxt('preprocessed_train.txt', skip_header=1, delimiter=',')
 
 trainingLines = parseFile(trainingFile)
 testLines = parseFile(testFile)
@@ -93,3 +85,5 @@ testFeatures = createFeature(trainingVocab, testLines)
 
 outputPreProcessed(trainingVocab, "preprocessed_train.txt", trainingFeatures)
 outputPreProcessed(trainingVocab, "preprocessed_test.txt", testFeatures)
+
+trainClassifiers()
