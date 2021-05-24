@@ -41,17 +41,15 @@ def createFeature(vocab, lines):
                 feature[i] = 1
 
     features = []
-    featureLen = 0
+
     for line in lines:
         features.append([0] * (M + 1))
         for word in line[0]:
             for i in range(M):
                 if(word == vocab[i]):
-                    features[featureLen][i] = 1
+                    features[-1][i] = 1
         if line[1] == 1:
-            features[featureLen][M] = 1
-        featureLen += 1
-
+            features[-1][-1] = 1
     return features
 
 
@@ -63,17 +61,18 @@ def outputPreProcessed(vocab, filePath, features):
 
     for word in range(len(vocab) - 1):
         out.write(str(vocab[word]) + ',')
-    out.write(str(vocab[word]) + ',classpath\n')
+    out.write(str(vocab[-1]) + ',classpath\n')
 
     for feature in features:
         for word in range(len(feature) - 1):
             out.write(str(feature[word]) + ',')
-        out.write(str(feature[word]) + '\n')
+        out.write(str(feature[-1]) + '\n')
     out.close()
 
 
 def trainClassifiers():
     train = numpy.genfromtxt('preprocessed_train.txt', skip_header=1, delimiter=',')
+    print(numpy.sum(train, axis=0))
 
 trainingLines = parseFile(trainingFile)
 testLines = parseFile(testFile)
