@@ -1,6 +1,8 @@
 import re
 import os
+import sys
 import numpy as numpy
+numpy.set_printoptions(threshold=sys.maxsize)
 
 testFile = open("testSet.txt", "rt")
 trainingFile = open("trainingSet.txt", "rt")
@@ -16,8 +18,6 @@ def parseFile(file):
         line[0] = re.sub(r'[^\w | \s]', '', line[0])
         line[0] = line[0].lower()
         line[0] = line[0].split()
-        # for word in line[0]:
-        #     vocab.add(word)
         line[1] = line[1].strip()
         line[1] = int(line[1])
         lines.append(line)
@@ -33,14 +33,13 @@ def getVocab(lines):
 
 def createFeature(vocab, lines):
     M = len(vocab)
+    features = []
 
     feature = [0] * (M + 1)
     for word in lines[0][0]:
         for i in range(len(vocab)):
             if word == vocab[i]:
                 feature[i] = 1
-
-    features = []
 
     for line in lines:
         features.append([0] * (M + 1))
@@ -50,6 +49,7 @@ def createFeature(vocab, lines):
                     features[-1][i] = 1
         if line[1] == 1:
             features[-1][-1] = 1
+
     return features
 
 
@@ -67,22 +67,44 @@ def outputPreProcessed(vocab, filePath, features):
         for word in range(len(feature) - 1):
             out.write(str(feature[word]) + ',')
         out.write(str(feature[-1]) + '\n')
+
     out.close()
 
+def printSentence(vocab, feature):
+    for i in range(len(feature) - 1):
+        if feature[i] == 1:
+            print(vocab[i], end=" ")
+    print()
 
-def trainClassifiers():
+def trainClassifiers(vocab):
     train = numpy.genfromtxt('preprocessed_train.txt', skip_header=1, delimiter=',')
-    print(numpy.sum(train, axis=0))
 
-trainingLines = parseFile(trainingFile)
-testLines = parseFile(testFile)
+    class1 = numpy.empty((0,train.shape[1]), int)
+    class2 = numpy.empty((0,train.shape[1]), int)
 
-trainingVocab = getVocab(trainingLines)
+    for line in train:
+        if line[-1] == 1:
+            class1 = numpy.append(class1, [line], axis=0)
+        else:
+            class2 = numpy.append(class2, [line], axis=0)
 
-trainingFeatures = createFeature(trainingVocab, trainingLines)
-testFeatures = createFeature(trainingVocab, testLines)
 
-outputPreProcessed(trainingVocab, "preprocessed_train.txt", trainingFeatures)
-outputPreProcessed(trainingVocab, "preprocessed_test.txt", testFeatures)
 
-trainClassifiers()
+
+
+def main():
+    trainingLines = parseFile(trainingFile)
+    testLines = parseFile(testFile)
+
+    trainingVocab = getVocab(trainingLines)
+
+    trainingFeatures = createFeature(trainingVocab, trainingLines)
+    testFeatures = createFeature(trainingVocab, testLines)
+
+    outputPreProcessed(trainingVocab, "preprocessed_train.txt", trainingFeatures)
+    outputPreProcessed(trainingVocab, "preprocessed_test.txt", testFeatures)
+
+    trainClassifiers(trainingVocab)
+
+if __name__ == "__main__":
+    main()
