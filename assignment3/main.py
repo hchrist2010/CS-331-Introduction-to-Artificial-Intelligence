@@ -1,3 +1,7 @@
+# Names: Hunter Christiansen, Matthew Laidlaw
+# Class: CS 331
+# Programming Assignment3: Sentiment Analysis
+
 import os
 import numpy as np
 import ProcessFile
@@ -55,6 +59,7 @@ def train_classifiers(train_file, test_file):
           make_predictions([py1_x1, py1_x0, py0_x1, py0_x0, py1_mean, py0_mean], test_file, test_labels)
           )
 
+
 # Apply test feature to the probabilities measured earlier. Compare the results of that to the labels provided
 # Sum up the comparison to get the total number of correct predictions
 # Return total correct / number of features being predicted to get accuracy
@@ -79,7 +84,7 @@ def make_predictions(probabilities, test_data, labels):
 
 
 def main():
-    if not (os.path.exists("preprocessed_train.txt") or os.path.exists("preprocessed_test.txt")):
+    if not (os.path.exists("preprocessed_train.txt") and os.path.exists("preprocessed_test.txt")):
         test_file = open("testSet.txt", "rt", encoding='utf-8')
         training_file = open("trainingSet.txt", "rt", encoding='utf-8')
 
