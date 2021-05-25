@@ -1,6 +1,8 @@
 import sys
 import numpy as np
 import ProcessFile
+from math import pi
+from math import exp
 
 np.set_printoptions(threshold=sys.maxsize)
 
@@ -31,6 +33,10 @@ def separate_by_class(features):
 def train_classifiers(vocab):
     train = np.genfromtxt('preprocessed_train.txt', skip_header=1, delimiter=',')
     positive_class, negative_class = separate_by_class(train)
+    positive_class_mean = np.mean(positive_class, axis=0)
+    positive_class_stdev = np.std(positive_class, axis=0)
+    negative_class_mean = np.mean(negative_class, axis=0)
+    negative_class_stdev = np.std(negative_class, axis=0)
 
 
 def main():
