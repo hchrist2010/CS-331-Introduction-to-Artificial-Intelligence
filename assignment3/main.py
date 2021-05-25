@@ -2,6 +2,8 @@ import sys
 import numpy as np
 import ProcessFile
 
+import math
+
 np.set_printoptions(threshold=sys.maxsize)
 
 testFile = open("testSet.txt", "rt")
@@ -25,13 +27,63 @@ def separate_by_class(features):
         else:
             class2 = np.append(class2, [line], axis=0)
 
-    return class1, class2
+    return class1[:,:-1], class2[:,:-1]
 
 
-def train_classifiers(vocab):
-    train = np.genfromtxt('preprocessed_train.txt', skip_header=1, delimiter=',')
+def train_classifiers(trainifile, testfile):
+    train = np.genfromtxt(trainifile, skip_header=1, delimiter=',')
+    test = np.genfromtxt(testfile, skip_header=1, delimiter=',')
     positive_class, negative_class = separate_by_class(train)
 
+    labels = train[:,-1]
+
+    positive_sum = np.sum(positive_class, axis=0)
+    negative_sum = np.sum(negative_class, axis=0)
+    total_sum = (positive_sum + negative_sum)
+
+    py1_mean = len(positive_class) / len(train)
+    py0_mean = len(negative_class) / len(train)
+
+    py1_x1 = np.log(positive_sum + 1) - np.log(positive_class.shape[0] + 2)
+    py1_x0 = np.log((positive_class.shape[0] - positive_sum) + 1) - np.log(positive_class.shape[0] + 2)
+
+    py0_x1 = np.log(negative_sum + 1) - np.log(negative_class.shape[0] + 2)
+    py0_x0 = np.log((negative_class.shape[0] - negative_sum) + 1) - np.log(negative_class.shape[0] + 2)
+
+    results = []
+
+
+    for line in test:
+        positive = 0
+        negative = 0
+        for j in range(test.shape[1] - 1):
+            if line[j] == 1:
+                positive += py1_x1[j]
+                negative += py0_x1[j]
+            else:
+                positive += py1_x0[j]
+                negative += py0_x0[j]
+
+        positive += math.log(py1_mean)
+        negative += math.log(py0_mean)
+
+        if positive >= negative:
+            results.append(1)
+        else:
+            results.append(0)
+
+    correct = 0
+    incorrect = 0
+
+    for i in range(len(results)):
+        if(labels[i] == results[i]):
+            correct += 1
+        else:
+            incorrect += 1
+
+    print(correct, incorrect)
+    print(correct / (correct + incorrect))
+    print()
 
 def main():
     training_lines = ProcessFile.parse_file(trainingFile)
@@ -42,10 +94,11 @@ def main():
     training_features = ProcessFile.create_feature(training_vocab, training_lines)
     test_features = ProcessFile.create_feature(training_vocab, test_lines)
 
-    ProcessFile.output_preprocessed(training_vocab, "preprocessed_train.txt", training_features)
-    ProcessFile.output_preprocessed(training_vocab, "preprocessed_test.txt", test_features)
+    train_classifiers('preprocessed_train.txt', 'preprocessed_train.txt')
+    train_classifiers('preprocessed_train.txt', 'preprocessed_test.txt')
 
-    train_classifiers(training_vocab)
+    # ProcessFile.output_preprocessed(training_vocab, "preprocessed_train.txt", training_features)
+    # ProcessFile.output_preprocessed(training_vocab, "preprocessed_test.txt", test_features)
 
 
 if __name__ == "__main__":

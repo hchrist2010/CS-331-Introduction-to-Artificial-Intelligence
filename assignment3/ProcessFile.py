@@ -32,16 +32,19 @@ def create_feature(vocab, lines):
 
     feature = [0] * (m + 1)
     for word in lines[0][0]:
-        for i in range(len(vocab)):
-            if word == vocab[i]:
-                feature[i] = 1
+        if word in vocab:
+            for i in range(len(vocab)):
+                if word == vocab[i]:
+                    feature[i] = 1
+
 
     for line in lines:
         features.append([0] * (m + 1))
         for word in line[0]:
-            for i in range(m):
-                if word == vocab[i]:
-                    features[-1][i] = 1
+            if word in vocab:
+                for i in range(m):
+                    if word == vocab[i]:
+                        features[-1][i] = 1
         if line[1] == 1:
             features[-1][-1] = 1
 
