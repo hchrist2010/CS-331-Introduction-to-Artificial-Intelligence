@@ -37,7 +37,6 @@ def create_feature(vocab, lines):
                 if word == vocab[i]:
                     feature[i] = 1
 
-
     for line in lines:
         features.append([0] * (m + 1))
         for word in line[0]:
@@ -55,7 +54,7 @@ def output_preprocessed(vocab, filepath, features):
     if os.path.exists(filepath):
         os.remove(filepath)
 
-    out = open(filepath, "w")
+    out = open(filepath, "w", encoding='utf-8')
 
     for word in range(len(vocab) - 1):
         out.write(str(vocab[word]) + ',')
